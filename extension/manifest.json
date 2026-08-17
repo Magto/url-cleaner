@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "URL Cleaner",
+  "version": "0.1.0",
+  "description": "Removes tracking junk from URLs — clean-copy shortcut and in-place address-bar cleaning.",
+  "background": { "service_worker": "background.js", "type": "module" },
+  "permissions": ["storage", "scripting", "activeTab", "clipboardWrite", "webNavigation", "tabs"],
+  "host_permissions": ["http://*/*", "https://*/*"],
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": { "default_popup": "popup/popup.html", "default_title": "URL Cleaner" },
+  "commands": {
+    "copy-clean-url": {
+      "suggested_key": { "default": "Alt+Shift+C", "mac": "Alt+Shift+C" },
+      "description": "Copy cleaned URL of the current tab"
+    }
+  }
+}
