@@ -4,7 +4,8 @@
   "version": "0.1.0",
   "description": "Removes tracking junk from URLs — clean-copy shortcut and in-place address-bar cleaning.",
   "background": { "service_worker": "background.js", "type": "module" },
-  "permissions": ["storage", "scripting", "activeTab", "clipboardWrite", "webNavigation", "tabs"],
+  "homepage_url": "https://github.com/Magto/url-cleaner",
+  "permissions": ["storage", "scripting", "activeTab", "clipboardWrite", "webNavigation"],
   "host_permissions": ["http://*/*", "https://*/*"],
   "content_scripts": [
     {
