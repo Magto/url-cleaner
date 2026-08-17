@@ -105,8 +105,9 @@ encoding of untouched params is preserved as-is where possible.
 
 ### 3. Clean-copy — `extension/background.js` + popup
 
-- Command `copy-clean-url`, suggested binding **Ctrl+Shift+C**
-  (Mac: **Cmd+Shift+C**), via the `commands` API.
+- Command `copy-clean-url`, suggested binding **Alt+Shift+C** (both
+  platforms; Ctrl/Cmd+Shift+C is reserved by DevTools inspect-element),
+  via the `commands` API. Remappable at `chrome://extensions/shortcuts`.
 - Handler: read active tab URL → clean (with redirect unwrapping) → write to
   clipboard by injecting a small `scripting.executeScript` snippet into the
   active tab that calls `navigator.clipboard.writeText` (works in both
@@ -132,9 +133,11 @@ No other persistent state. No sync (personal, per-machine is fine).
 
 ### 6. Manifest / permissions
 
-Manifest V3. Permissions: `storage`, `scripting`, `activeTab`,
-`clipboardWrite`; host permissions `http://*/*`, `https://*/*` for the
-content script. Background declared as `service_worker` (supported by
+Manifest V3. Permissions: `storage`, `scripting`, `activeTab`, `tabs`,
+`clipboardWrite`, `webNavigation` (SPA navigations are invisible to the
+content script's isolated world, so the background signals re-cleans via
+`webNavigation.onHistoryStateUpdated`); host permissions `http://*/*`,
+`https://*/*` for the content script. Background declared as `service_worker` (supported by
 Chrome and Safari 16.4+). **No analytics, no runtime network calls** — rules
 are bundled.
 
