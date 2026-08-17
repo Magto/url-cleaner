@@ -72,3 +72,28 @@ describe('provider matching and exceptions', () => {
     expect(cleanUrl(input, SITE_PROVIDERS).cleaned).toBe(input);
   });
 });
+
+const RAW_PROVIDERS = {
+  amazonLike: {
+    urlPattern: '^https?://(?:[a-z0-9-]+\\.)*?amazon\\.(?:com|se|de)',
+    rules: ['pd_rd_.*'],
+    referralMarketing: ['tag'],
+    rawRules: ['\\/ref\\=[^/?#]*'],
+  },
+};
+
+describe('rawRules and referralMarketing', () => {
+  it('removes raw path junk like Amazon /ref= segments', () => {
+    const { cleaned, removed } = cleanUrl(
+      'https://www.amazon.se/dp/B083DP4LXH/ref=sr_1_3?keywords=bosch',
+      RAW_PROVIDERS,
+    );
+    expect(cleaned).toBe('https://www.amazon.se/dp/B083DP4LXH?keywords=bosch');
+    expect(removed).toContain('raw:\\/ref\\=[^/?#]*');
+  });
+
+  it('treats referralMarketing params as junk', () => {
+    const { cleaned } = cleanUrl('https://www.amazon.se/dp/B083DP4LXH?tag=affiliate-21', RAW_PROVIDERS);
+    expect(cleaned).toBe('https://www.amazon.se/dp/B083DP4LXH');
+  });
+});

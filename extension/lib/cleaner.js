@@ -27,6 +27,19 @@ function cleanRecursive(urlString, providers, unwrap, depth) {
     if (!provider || !safeTest(provider.urlPattern, current)) continue;
     if ((provider.exceptions ?? []).some((e) => safeTest(e, current))) continue;
 
+    for (const raw of provider.rawRules ?? []) {
+      let next = current;
+      try {
+        next = current.replace(new RegExp(raw, 'gi'), '');
+      } catch {
+        continue;
+      }
+      if (next !== current) {
+        removed.push(`raw:${raw}`);
+        current = next;
+      }
+    }
+
     const paramRules = [...(provider.rules ?? []), ...(provider.referralMarketing ?? [])];
     if (paramRules.length) current = stripQueryParams(current, paramRules, removed);
   }
