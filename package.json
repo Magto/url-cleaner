@@ -8,6 +8,7 @@
     "update-rules": "node scripts/update-rules.mjs"
   },
   "devDependencies": {
+    "sharp": "^0.35.3",
     "vitest": "^4.1.10"
   }
 }
