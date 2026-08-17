@@ -52,6 +52,13 @@ describe('real ClearURLs snapshot', () => {
     expect(cleaned).toBe('https://www.amazon.se/dp/B083DP4LXH?psc=1');
   });
 
+  it('strips the AliExpress affiliate bundle by default, keeps it with keepReferral', () => {
+    const input =
+      'https://www.aliexpress.com/?aff_fcid=56cdd749951b474fab587dcb5c453b71-1787008447956-00868-_DmE0c9x&tt=CPS_NORMAL&aff_fsk=_DmE0c9x&aff_platform=portals-tool&aff_trace_key=56cdd749951b474fab587dcb5c453b71-1787008447956-00868-_DmE0c9x&afSmartRedirect=y';
+    expect(cleanUrl(input, providers).cleaned).toBe('https://www.aliexpress.com/');
+    expect(cleanUrl(input, providers, { keepReferral: true }).cleaned).toBe(input);
+  });
+
   it('leaves a clean URL alone', () => {
     const input = 'https://www.svt.se/nyheter/lokalt/uppsala?page=3';
     expect(cleanUrl(input, providers).cleaned).toBe(input);

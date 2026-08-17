@@ -3,6 +3,10 @@
     "customGlobal": {
       "urlPattern": ".*",
       "rules": ["geniuslink"]
+    },
+    "customAliexpress": {
+      "urlPattern": "^https?://(?:[a-z0-9-]+\\.)*?aliexpress\\.[a-z.]+",
+      "referralMarketing": ["aff_[a-z_]*", "afSmartRedirect", "tt"]
     }
   }
 }
