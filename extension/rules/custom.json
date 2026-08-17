@@ -6,6 +6,7 @@
     },
     "customAliexpress": {
       "urlPattern": "^https?://(?:[a-z0-9-]+\\.)*?aliexpress\\.[a-z.]+",
+      "rules": ["disableNav", "pha_manifest", "_immersiveMode", "businessCode", "source"],
       "referralMarketing": ["aff_[a-z_]*", "afSmartRedirect", "tt"]
     }
   }

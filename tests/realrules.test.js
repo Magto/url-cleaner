@@ -59,6 +59,14 @@ describe('real ClearURLs snapshot', () => {
     expect(cleanUrl(input, providers, { keepReferral: true }).cleaned).toBe(input);
   });
 
+  it('strips AliExpress webview/attribution flags but keeps functional productIds', () => {
+    const input =
+      'https://www.aliexpress.com/ssr/300002660/Deals-HomePage?disableNav=YES&pha_manifest=ssr&_immersiveMode=true&businessCode=guide&source=superdeals&productIds=1005011993727808';
+    expect(cleanUrl(input, providers).cleaned).toBe(
+      'https://www.aliexpress.com/ssr/300002660/Deals-HomePage?productIds=1005011993727808',
+    );
+  });
+
   it('leaves a clean URL alone', () => {
     const input = 'https://www.svt.se/nyheter/lokalt/uppsala?page=3';
     expect(cleanUrl(input, providers).cleaned).toBe(input);
