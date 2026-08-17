@@ -11,25 +11,39 @@ async function init() {
     $('cleaned').textContent = '(not a web page)';
     $('copy').disabled = true;
     $('autoclean').disabled = true;
+    $('keepreferral').disabled = true;
     return;
   }
   const host = new URL(url).hostname;
 
-  const res = await new Promise((resolve) =>
-    api.runtime.sendMessage({ type: 'clean', url, unwrap: true }, resolve),
-  );
-  const cleaned = res?.cleaned ?? url;
-  $('cleaned').textContent = cleaned;
-  for (const name of res?.removed ?? []) {
-    const li = document.createElement('li');
-    li.textContent = name;
-    $('removed').appendChild(li);
+  let cleaned = url;
+  async function refreshCleaned() {
+    const res = await new Promise((resolve) =>
+      api.runtime.sendMessage({ type: 'clean', url, unwrap: true }, resolve),
+    );
+    cleaned = res?.cleaned ?? url;
+    $('cleaned').textContent = cleaned;
+    $('removed').replaceChildren();
+    for (const name of res?.removed ?? []) {
+      const li = document.createElement('li');
+      li.textContent = name;
+      $('removed').appendChild(li);
+    }
   }
+  await refreshCleaned();
 
   $('copy').addEventListener('click', async () => {
     await navigator.clipboard.writeText(cleaned);
     $('copy').textContent = 'Copied ✓';
     setTimeout(() => ($('copy').textContent = 'Copy clean URL'), 1200);
+  });
+
+  const { keepReferral = false } = await new Promise((resolve) =>
+    api.storage.local.get({ keepReferral: false }, resolve),
+  );
+  $('keepreferral').checked = keepReferral === true;
+  $('keepreferral').addEventListener('change', () => {
+    api.storage.local.set({ keepReferral: $('keepreferral').checked }, refreshCleaned);
   });
 
   let hosts = await new Promise((resolve) =>

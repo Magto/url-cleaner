@@ -5,13 +5,16 @@ const MAX_UNWRAP_DEPTH = 5;
 
 export function cleanUrl(urlString, providers, opts = {}) {
   try {
-    return cleanRecursive(urlString, providers, opts.unwrap === true, 0);
+    return cleanRecursive(urlString, providers, {
+      unwrap: opts.unwrap === true,
+      keepReferral: opts.keepReferral === true,
+    }, 0);
   } catch {
     return { cleaned: urlString, removed: [] };
   }
 }
 
-function cleanRecursive(urlString, providers, unwrap, depth) {
+function cleanRecursive(urlString, providers, opts, depth) {
   let parsed;
   try {
     parsed = new URL(urlString);
@@ -29,7 +32,7 @@ function cleanRecursive(urlString, providers, unwrap, depth) {
     if (!provider || !safeTest(provider.urlPattern, current)) continue;
     if ((provider.exceptions ?? []).some((e) => safeTest(e, current))) continue;
 
-    if (unwrap && depth < MAX_UNWRAP_DEPTH) {
+    if (opts.unwrap && depth < MAX_UNWRAP_DEPTH) {
       for (const redirection of provider.redirections ?? []) {
         let match = null;
         try {
@@ -40,7 +43,7 @@ function cleanRecursive(urlString, providers, unwrap, depth) {
         if (match && match[1]) {
           const target = decodeSafe(match[1]);
           if (!/^https?:\/\//i.test(target)) continue;
-          const inner = cleanRecursive(target, providers, true, depth + 1);
+          const inner = cleanRecursive(target, providers, opts, depth + 1);
           return {
             cleaned: inner.cleaned,
             removed: [...removed, 'redirect:unwrapped', ...inner.removed],
@@ -62,7 +65,10 @@ function cleanRecursive(urlString, providers, unwrap, depth) {
       }
     }
 
-    const paramRules = [...(provider.rules ?? []), ...(provider.referralMarketing ?? [])];
+    const paramRules = [
+      ...(provider.rules ?? []),
+      ...(opts.keepReferral ? [] : provider.referralMarketing ?? []),
+    ];
     if (paramRules.length) current = stripQueryParams(current, paramRules, removed);
   }
 

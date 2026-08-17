@@ -139,6 +139,32 @@ describe('redirect unwrapping', () => {
   });
 });
 
+describe('keepReferral option', () => {
+  it('keeps referralMarketing params but still strips junk when on', () => {
+    const { cleaned, removed } = cleanUrl(
+      'https://www.amazon.se/dp/B083DP4LXH?tag=friend-21&pd_rd_w=x',
+      RAW_PROVIDERS,
+      { keepReferral: true },
+    );
+    expect(cleaned).toBe('https://www.amazon.se/dp/B083DP4LXH?tag=friend-21');
+    expect(removed).toEqual(['pd_rd_w']);
+  });
+
+  it('still strips referral params by default', () => {
+    const { cleaned } = cleanUrl('https://www.amazon.se/dp/B083DP4LXH?tag=friend-21', RAW_PROVIDERS);
+    expect(cleaned).toBe('https://www.amazon.se/dp/B083DP4LXH');
+  });
+
+  it('keeps referral through redirect unwrapping', () => {
+    const providers = { ...REDIRECT_PROVIDERS, ...RAW_PROVIDERS };
+    const wrapper =
+      'https://www.google.se/url?q=' +
+      encodeURIComponent('https://www.amazon.se/dp/B083DP4LXH?tag=friend-21&pd_rd_w=x');
+    const { cleaned } = cleanUrl(wrapper, providers, { unwrap: true, keepReferral: true });
+    expect(cleaned).toBe('https://www.amazon.se/dp/B083DP4LXH?tag=friend-21');
+  });
+});
+
 describe('mergeRules', () => {
   it('custom provider wins over base on the same key', () => {
     const base = { providers: { shop: { urlPattern: '.*', rules: ['a'] } } };

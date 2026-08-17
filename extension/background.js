@@ -14,10 +14,18 @@ function getProviders() {
   return providersPromise;
 }
 
+function getKeepReferral() {
+  return new Promise((resolve) =>
+    api.storage.local.get({ keepReferral: false }, (r) => resolve(r.keepReferral === true)),
+  );
+}
+
 api.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   if (msg?.type === 'clean') {
-    getProviders()
-      .then((providers) => sendResponse(cleanUrl(msg.url, providers, { unwrap: !!msg.unwrap })))
+    Promise.all([getProviders(), getKeepReferral()])
+      .then(([providers, keepReferral]) =>
+        sendResponse(cleanUrl(msg.url, providers, { unwrap: !!msg.unwrap, keepReferral })),
+      )
       .catch(() => sendResponse({ cleaned: msg.url, removed: [] }));
     return true; // async response
   }
@@ -38,8 +46,8 @@ api.commands.onCommand.addListener(async (command) => {
     flashBadge('!');
     return;
   }
-  const providers = await getProviders();
-  const { cleaned } = cleanUrl(tab.url, providers, { unwrap: true });
+  const [providers, keepReferral] = await Promise.all([getProviders(), getKeepReferral()]);
+  const { cleaned } = cleanUrl(tab.url, providers, { unwrap: true, keepReferral });
   try {
     await api.scripting.executeScript({
       target: { tabId: tab.id },

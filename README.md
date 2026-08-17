@@ -9,6 +9,9 @@ Personal Chrome + Safari extension that strips tracking junk from URLs.
 - Rules: bundled snapshot of the [ClearURLs](https://clearurls.xyz) ruleset
   plus local overrides in `extension/rules/custom.json` (same format,
   wins on conflict).
+- **Keep referral codes** — global popup toggle; when on, affiliate params
+  (e.g. Amazon `tag=`) survive cleaning so shared links still credit their
+  owner. Default off.
 
 Example: `amazon.se/...dp/B083DP4LXH?pd_rd_w=…&pf_rd_r=…&th=1`
 → `amazon.se/...dp/B083DP4LXH`

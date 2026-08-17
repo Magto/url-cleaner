@@ -36,6 +36,14 @@ describe('real ClearURLs snapshot', () => {
     expect(cleaned).toBe('https://en.wikipedia.org/wiki/Bosch');
   });
 
+  it('strips Amazon referral tag by default but keeps it with keepReferral', () => {
+    const input = 'https://www.amazon.se/dp/B083DP4LXH?tag=friend-21&pd_rd_w=InoTU';
+    expect(cleanUrl(input, providers).cleaned).toBe('https://www.amazon.se/dp/B083DP4LXH');
+    expect(cleanUrl(input, providers, { keepReferral: true }).cleaned).toBe(
+      'https://www.amazon.se/dp/B083DP4LXH?tag=friend-21',
+    );
+  });
+
   it('leaves a clean URL alone', () => {
     const input = 'https://www.svt.se/nyheter/lokalt/uppsala?page=3';
     expect(cleanUrl(input, providers).cleaned).toBe(input);
