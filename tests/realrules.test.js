@@ -44,6 +44,14 @@ describe('real ClearURLs snapshot', () => {
     );
   });
 
+  it('removes custom.json additions like geniuslink', () => {
+    const { cleaned } = cleanUrl(
+      'https://www.amazon.se/dp/B083DP4LXH?geniuslink=true&psc=1',
+      providers,
+    );
+    expect(cleaned).toBe('https://www.amazon.se/dp/B083DP4LXH?psc=1');
+  });
+
   it('leaves a clean URL alone', () => {
     const input = 'https://www.svt.se/nyheter/lokalt/uppsala?page=3';
     expect(cleanUrl(input, providers).cleaned).toBe(input);
