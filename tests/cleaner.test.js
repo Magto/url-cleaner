@@ -97,3 +97,44 @@ describe('rawRules and referralMarketing', () => {
     expect(cleaned).toBe('https://www.amazon.se/dp/B083DP4LXH');
   });
 });
+
+const REDIRECT_PROVIDERS = {
+  googleLike: {
+    urlPattern: '^https?://(?:[a-z0-9-]+\\.)*?google\\.(?:com|se)',
+    redirections: ['^https?://(?:[a-z0-9-]+\\.)*?google\\.(?:com|se)/url\\?.*?(?:url|q)=([^&]+)'],
+  },
+  globalRules: {
+    urlPattern: '.*',
+    rules: ['utm_(?:source|medium|campaign|term|content)'],
+  },
+};
+
+describe('redirect unwrapping', () => {
+  const wrapper =
+    'https://www.google.se/url?q=' +
+    encodeURIComponent('https://example.com/target?utm_source=google&x=1') +
+    '&sa=D';
+
+  it('unwraps and cleans the target when unwrap is on', () => {
+    const { cleaned } = cleanUrl(wrapper, REDIRECT_PROVIDERS, { unwrap: true });
+    expect(cleaned).toBe('https://example.com/target?x=1');
+  });
+
+  it('does NOT unwrap when unwrap is off (auto-clean mode)', () => {
+    const { cleaned } = cleanUrl(wrapper, REDIRECT_PROVIDERS);
+    expect(cleaned.startsWith('https://www.google.se/url?')).toBe(true);
+  });
+
+  it('ignores redirection targets that are not http(s)', () => {
+    const bad = 'https://www.google.se/url?q=javascript%3Aalert(1)';
+    const { cleaned } = cleanUrl(bad, REDIRECT_PROVIDERS, { unwrap: true });
+    expect(cleaned.startsWith('https://www.google.se/url?')).toBe(true);
+  });
+
+  it('caps recursion on self-referencing wrappers', () => {
+    const loop = 'https://www.google.se/url?q=' +
+      encodeURIComponent('https://www.google.se/url?q=https%3A%2F%2Fwww.google.se%2Furl');
+    // Must terminate and return a string — no stack overflow.
+    expect(typeof cleanUrl(loop, REDIRECT_PROVIDERS, { unwrap: true }).cleaned).toBe('string');
+  });
+});

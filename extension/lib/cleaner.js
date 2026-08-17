@@ -1,6 +1,8 @@
 // Pure URL-cleaning engine implementing ClearURLs rule semantics.
 // No browser APIs — unit-testable in Node.
 
+const MAX_UNWRAP_DEPTH = 5;
+
 export function cleanUrl(urlString, providers, opts = {}) {
   try {
     return cleanRecursive(urlString, providers, opts.unwrap === true, 0);
@@ -26,6 +28,26 @@ function cleanRecursive(urlString, providers, unwrap, depth) {
   for (const provider of Object.values(providers)) {
     if (!provider || !safeTest(provider.urlPattern, current)) continue;
     if ((provider.exceptions ?? []).some((e) => safeTest(e, current))) continue;
+
+    if (unwrap && depth < MAX_UNWRAP_DEPTH) {
+      for (const redirection of provider.redirections ?? []) {
+        let match = null;
+        try {
+          match = current.match(new RegExp(redirection, 'i'));
+        } catch {
+          continue;
+        }
+        if (match && match[1]) {
+          const target = decodeSafe(match[1]);
+          if (!/^https?:\/\//i.test(target)) continue;
+          const inner = cleanRecursive(target, providers, true, depth + 1);
+          return {
+            cleaned: inner.cleaned,
+            removed: [...removed, 'redirect:unwrapped', ...inner.removed],
+          };
+        }
+      }
+    }
 
     for (const raw of provider.rawRules ?? []) {
       let next = current;
