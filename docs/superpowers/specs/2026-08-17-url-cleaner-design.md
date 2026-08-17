@@ -21,8 +21,8 @@ https://www.amazon.se/Bosch-professionell-tillbeh%C3%B6r-skruvmejsel-borrskruvme
 → https://www.amazon.se/Bosch-professionell-tillbeh%C3%B6r-skruvmejsel-borrskruvmejsel/dp/B083DP4LXH?th=1
 ```
 
-`th=1` is a functional variant selector and survives; all `pd_rd_*` /
-`pf_rd_*` / `content-id` junk is removed.
+Both forms were accepted by Martin. The upstream ClearURLs Amazon provider
+lists `th` as junk, so the actual result is the fully bare second form.
 
 ## Decisions made
 
