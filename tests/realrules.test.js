@@ -67,6 +67,14 @@ describe('real ClearURLs snapshot', () => {
     );
   });
 
+  it('strips AliExpress product-page tracking but keeps the variant selector pdp_ext_f', () => {
+    const input =
+      'https://www.aliexpress.com/item/1005010114448300.html?sourceType=561&pvid=e5aec4df-c76f-4fba-8cd5-603aaa1efa08&pdp_ext_f=%7B%22ship_from%22%3A%22CN%22%2C%22sku_id%22%3A%2212000051191005045%22%7D&aecmd=true';
+    expect(cleanUrl(input, providers).cleaned).toBe(
+      'https://www.aliexpress.com/item/1005010114448300.html?pdp_ext_f=%7B%22ship_from%22%3A%22CN%22%2C%22sku_id%22%3A%2212000051191005045%22%7D',
+    );
+  });
+
   it('leaves a clean URL alone', () => {
     const input = 'https://www.svt.se/nyheter/lokalt/uppsala?page=3';
     expect(cleanUrl(input, providers).cleaned).toBe(input);
