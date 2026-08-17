@@ -46,8 +46,21 @@ api.commands.onCommand.addListener(async (command) => {
     flashBadge('!');
     return;
   }
+  // Prefer the page's true pre-clean URL (auto-clean may already have
+  // rewritten the address bar, e.g. stripping a referral tag the user now
+  // wants kept). Falls back to the tab URL on restricted pages.
+  const original = await new Promise((resolve) => {
+    try {
+      api.tabs.sendMessage(tab.id, { type: 'getOriginal' }, (res) => {
+        void api.runtime.lastError;
+        resolve(res?.originalUrl ?? tab.url);
+      });
+    } catch {
+      resolve(tab.url);
+    }
+  });
   const [providers, keepReferral] = await Promise.all([getProviders(), getKeepReferral()]);
-  const { cleaned } = cleanUrl(tab.url, providers, { unwrap: true, keepReferral });
+  const { cleaned } = cleanUrl(original, providers, { unwrap: true, keepReferral });
   try {
     await api.scripting.executeScript({
       target: { tabId: tab.id },

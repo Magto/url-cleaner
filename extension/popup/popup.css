@@ -17,6 +17,7 @@ h1 { font-size: 14px; margin: 0 0 8px; }
   overflow-y: auto;
 }
 .url.clean { background: #e8f4e8; }
+.junk { color: #c62828; text-decoration: line-through; }
 #removed { margin: 6px 0; padding-left: 18px; color: #a33; font-size: 12px; }
 #removed:empty { display: none; }
 button {
