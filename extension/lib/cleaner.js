@@ -70,6 +70,10 @@ function cleanRecursive(urlString, providers, opts, depth) {
       ...(opts.keepReferral ? [] : provider.referralMarketing ?? []),
     ];
     if (paramRules.length) current = stripQueryParams(current, paramRules, removed);
+
+    for (const [param, keepKeys] of Object.entries(provider.jsonParamKeep ?? {})) {
+      current = filterJsonParam(current, param, keepKeys, removed);
+    }
   }
 
   return { cleaned: current, removed };
@@ -95,6 +99,59 @@ function stripQueryParams(urlString, paramRules, removed) {
       kept.push(pair);
     }
   }
+  const base = urlString.slice(0, qIndex);
+  return kept.length ? `${base}?${kept.join('&')}${hash}` : `${base}${hash}`;
+}
+
+// For params whose value is URL-encoded JSON (e.g. AliExpress pdp_ext_f,
+// which mixes the functional variant selection with recommendation
+// telemetry): keep only the whitelisted keys; drop the param entirely when
+// none remain. Non-JSON values pass through untouched.
+function filterJsonParam(urlString, param, keepKeys, removed) {
+  const qIndex = urlString.indexOf('?');
+  if (qIndex === -1) return urlString;
+  const hashIndex = urlString.indexOf('#', qIndex);
+  const query = hashIndex === -1 ? urlString.slice(qIndex + 1) : urlString.slice(qIndex + 1, hashIndex);
+  const hash = hashIndex === -1 ? '' : urlString.slice(hashIndex);
+
+  const kept = [];
+  let changed = false;
+  for (const pair of query.split('&')) {
+    if (pair === '') continue;
+    const eq = pair.indexOf('=');
+    const name = decodeSafe(eq === -1 ? pair : pair.slice(0, eq));
+    if (name !== param || eq === -1) {
+      kept.push(pair);
+      continue;
+    }
+    let parsed;
+    try {
+      parsed = JSON.parse(decodeSafe(pair.slice(eq + 1)));
+    } catch {
+      kept.push(pair);
+      continue;
+    }
+    if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      kept.push(pair);
+      continue;
+    }
+    const filtered = {};
+    for (const key of Object.keys(parsed)) {
+      if (keepKeys.includes(key)) filtered[key] = parsed[key];
+    }
+    if (Object.keys(filtered).length === Object.keys(parsed).length) {
+      kept.push(pair);
+      continue;
+    }
+    changed = true;
+    if (Object.keys(filtered).length === 0) {
+      removed.push(param);
+    } else {
+      removed.push(`${param}: kept only ${Object.keys(filtered).join(', ')}`);
+      kept.push(`${param}=${encodeURIComponent(JSON.stringify(filtered))}`);
+    }
+  }
+  if (!changed) return urlString;
   const base = urlString.slice(0, qIndex);
   return kept.length ? `${base}?${kept.join('&')}${hash}` : `${base}${hash}`;
 }

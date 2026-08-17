@@ -1,7 +1,7 @@
 ﻿{
   "manifest_version": 3,
   "name": "URL Cleaner",
-  "version": "0.3.4",
+  "version": "0.4.0",
   "description": "Removes tracking junk from URLs — clean-copy shortcut and in-place address-bar cleaning.",
   "background": { "service_worker": "background.js", "type": "module" },
   "homepage_url": "https://github.com/Magto/url-cleaner",

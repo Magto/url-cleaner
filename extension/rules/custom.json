@@ -6,8 +6,9 @@
     },
     "customAliexpress": {
       "urlPattern": "^https?://(?:[a-z0-9-]+\\.)*?aliexpress\\.[a-z.]+",
-      "rules": ["disableNav", "pha_manifest", "_immersiveMode", "businessCode", "source", "sourceType", "pvid", "aecmd", "pdp_npi", "gatewayAdapt"],
-      "referralMarketing": ["aff_[a-z_]*", "afSmartRedirect", "tt"]
+      "rules": ["disableNav", "pha_manifest", "_immersiveMode", "businessCode", "source", "sourceType", "pvid", "aecmd", "pdp_npi", "gatewayAdapt", "_t", "utparam-url"],
+      "referralMarketing": ["aff_[a-z_]*", "afSmartRedirect", "tt"],
+      "jsonParamKeep": { "pdp_ext_f": ["sku_id", "ship_from"] }
     }
   }
 }

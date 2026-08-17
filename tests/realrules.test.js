@@ -75,6 +75,14 @@ describe('real ClearURLs snapshot', () => {
     );
   });
 
+  it('drops telemetry-only pdp_ext_f and the _t/utparam-url bundles entirely', () => {
+    const input =
+      'https://www.aliexpress.com/item/1005012221800401.html?_t=gps-id%3ApcDetailTopMoreOtherSeller%2Cscm-url%3A1007.40050.354490.0%2Cpvid%3A45562283-1745-4970-ab3d-a681282cfa35%2Ctpp_buckets%3A668%232846%238107%231934&pdp_ext_f=%7B%22order%22%3A%22382%22%2C%22eval%22%3A%221%22%2C%22orig_sl_item_id%22%3A%221005012221800401%22%2C%22orig_item_id%22%3A%221005010687254406%22%2C%22sceneId%22%3A%2230050%22%2C%22fromPage%22%3A%22recommend%22%7D&utparam-url=scene%3ApcDetailTopMoreOtherSeller%7Cquery_from%3A%7Cx_object_id%3A1005012221800401%7C_p_origin_prod%3A1005010687254406';
+    expect(cleanUrl(input, providers).cleaned).toBe(
+      'https://www.aliexpress.com/item/1005012221800401.html',
+    );
+  });
+
   it('leaves a clean URL alone', () => {
     const input = 'https://www.svt.se/nyheter/lokalt/uppsala?page=3';
     expect(cleanUrl(input, providers).cleaned).toBe(input);

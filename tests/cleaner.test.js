@@ -165,6 +165,34 @@ describe('keepReferral option', () => {
   });
 });
 
+const JSON_PARAM_PROVIDERS = {
+  aliLike: {
+    urlPattern: '^https?://(?:[a-z0-9-]+\\.)*?aliexpress\\.com',
+    jsonParamKeep: { pdp_ext_f: ['sku_id', 'ship_from'] },
+  },
+};
+
+describe('jsonParamKeep', () => {
+  it('keeps only whitelisted keys inside a JSON param', () => {
+    const value = encodeURIComponent(JSON.stringify({ ship_from: 'CN', sku_id: '12000051', fromPage: 'recommend' }));
+    const { cleaned } = cleanUrl(`https://www.aliexpress.com/item/1.html?pdp_ext_f=${value}&x=1`, JSON_PARAM_PROVIDERS);
+    const expected = encodeURIComponent(JSON.stringify({ ship_from: 'CN', sku_id: '12000051' }));
+    expect(cleaned).toBe(`https://www.aliexpress.com/item/1.html?pdp_ext_f=${expected}&x=1`);
+  });
+
+  it('drops the param entirely when no whitelisted keys remain', () => {
+    const value = encodeURIComponent(JSON.stringify({ order: '382', fromPage: 'recommend' }));
+    const { cleaned, removed } = cleanUrl(`https://www.aliexpress.com/item/1.html?pdp_ext_f=${value}`, JSON_PARAM_PROVIDERS);
+    expect(cleaned).toBe('https://www.aliexpress.com/item/1.html');
+    expect(removed).toContain('pdp_ext_f');
+  });
+
+  it('leaves non-JSON values untouched', () => {
+    const input = 'https://www.aliexpress.com/item/1.html?pdp_ext_f=notjson';
+    expect(cleanUrl(input, JSON_PARAM_PROVIDERS).cleaned).toBe(input);
+  });
+});
+
 describe('mergeRules', () => {
   it('custom provider wins over base on the same key', () => {
     const base = { providers: { shop: { urlPattern: '.*', rules: ['a'] } } };
