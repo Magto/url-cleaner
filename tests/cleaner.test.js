@@ -49,3 +49,26 @@ describe('global query-param removal', () => {
     expect(cleanUrl(input, GLOBAL_ONLY)).toEqual({ cleaned: input, removed: [] });
   });
 });
+
+const SITE_PROVIDERS = {
+  exampleShop: {
+    urlPattern: '^https?://(?:[a-z0-9-]+\\.)*?shop\\.example\\.com',
+    rules: ['tracker_.*'],
+    exceptions: ['^https?://shop\\.example\\.com/checkout'],
+  },
+};
+
+describe('provider matching and exceptions', () => {
+  it('applies provider rules only on matching hosts', () => {
+    const onSite = cleanUrl('https://shop.example.com/item?tracker_id=9&sku=1', SITE_PROVIDERS);
+    expect(onSite.cleaned).toBe('https://shop.example.com/item?sku=1');
+
+    const offSite = cleanUrl('https://other.example.org/item?tracker_id=9', SITE_PROVIDERS);
+    expect(offSite.cleaned).toBe('https://other.example.org/item?tracker_id=9');
+  });
+
+  it('skips the provider entirely when an exception matches', () => {
+    const input = 'https://shop.example.com/checkout?tracker_id=9&cart=abc';
+    expect(cleanUrl(input, SITE_PROVIDERS).cleaned).toBe(input);
+  });
+});

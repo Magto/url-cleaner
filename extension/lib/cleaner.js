@@ -25,6 +25,7 @@ function cleanRecursive(urlString, providers, unwrap, depth) {
 
   for (const provider of Object.values(providers)) {
     if (!provider || !safeTest(provider.urlPattern, current)) continue;
+    if ((provider.exceptions ?? []).some((e) => safeTest(e, current))) continue;
 
     const paramRules = [...(provider.rules ?? []), ...(provider.referralMarketing ?? [])];
     if (paramRules.length) current = stripQueryParams(current, paramRules, removed);
