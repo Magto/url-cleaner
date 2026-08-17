@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { cleanUrl } from '../extension/lib/cleaner.js';
+import { cleanUrl, mergeRules } from '../extension/lib/cleaner.js';
 
 const GLOBAL_ONLY = {
   globalRules: {
@@ -136,5 +136,41 @@ describe('redirect unwrapping', () => {
       encodeURIComponent('https://www.google.se/url?q=https%3A%2F%2Fwww.google.se%2Furl');
     // Must terminate and return a string — no stack overflow.
     expect(typeof cleanUrl(loop, REDIRECT_PROVIDERS, { unwrap: true }).cleaned).toBe('string');
+  });
+});
+
+describe('mergeRules', () => {
+  it('custom provider wins over base on the same key', () => {
+    const base = { providers: { shop: { urlPattern: '.*', rules: ['a'] } } };
+    const custom = { providers: { shop: { urlPattern: '.*', rules: ['b'] } } };
+    const merged = mergeRules(base, custom);
+    expect(cleanUrl('https://x.se/?a=1&b=2', merged).cleaned).toBe('https://x.se/?a=1');
+  });
+
+  it('tolerates null/missing inputs', () => {
+    expect(mergeRules(null, null)).toEqual({});
+    expect(mergeRules({ providers: { p: { urlPattern: '.*' } } }, undefined)).toHaveProperty('p');
+  });
+});
+
+describe('never-throw hardening', () => {
+  it('returns malformed URLs unchanged', () => {
+    expect(cleanUrl('http://[not-a-url', {})).toEqual({ cleaned: 'http://[not-a-url', removed: [] });
+    expect(cleanUrl('', {})).toEqual({ cleaned: '', removed: [] });
+  });
+
+  it('survives invalid regexes in every rule position', () => {
+    const broken = {
+      p: {
+        urlPattern: '([',
+        rules: ['(('],
+        rawRules: ['*bad'],
+        exceptions: ['[z'],
+        redirections: ['(('],
+      },
+      ok: { urlPattern: '.*', rules: ['utm_source'] },
+    };
+    const { cleaned } = cleanUrl('https://a.se/?utm_source=x&k=1', broken, { unwrap: true });
+    expect(cleaned).toBe('https://a.se/?k=1');
   });
 });

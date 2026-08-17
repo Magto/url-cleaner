@@ -109,6 +109,10 @@ function safeTest(pattern, value) {
   }
 }
 
+export function mergeRules(base, custom) {
+  return { ...(base?.providers ?? {}), ...(custom?.providers ?? {}) };
+}
+
 function decodeSafe(s) {
   try {
     return decodeURIComponent(s);
