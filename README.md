@@ -31,6 +31,21 @@ Example: `amazon.se/...dp/B083DP4LXH?pd_rd_w=…&pf_rd_r=…&th=1`
 
 `safari-build/` is gitignored — regenerate any time from `extension/`.
 
+## Cross-browser background gotchas (learned the hard way)
+
+- The manifest declares **both** `background.service_worker` (Chrome) and
+  `background.scripts` (Safari). Chrome shows a warning that `scripts`
+  is MV2-only — harmless, it ignores the key. Don't "fix" it.
+- Background code must be **classic scripts, no ESM** — Safari can't load
+  module background content (`"type": "module"` + `import` = "background
+  content failed to load").
+- In Safari all background scripts share one global scope: never declare
+  top-level `const`/`let` that shadow `cleaner.js`'s global functions
+  (SyntaxError kills the whole background). Use the `UC` namespace alias.
+- All `browser.*` calls must be promise-first: Safari silently ignores
+  Chrome-style callbacks (storage reads that never resolve = popup toggles
+  stuck unchecked, auto-clean never arming).
+
 ## Updating the rules
 
 ```
