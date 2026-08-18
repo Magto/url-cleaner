@@ -42,6 +42,7 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="800" v
 
 const out = fileURLToPath(new URL('../docs/store/screenshot-1.png', import.meta.url));
 await sharp(Buffer.from(svg), { density: 96 })
+  .resize(1280, 800) // the store requires exactly 1280x800; density scaling otherwise yields 1707x1067
   .flatten({ background: '#f4f7fb' })
   .removeAlpha()
   .png()
