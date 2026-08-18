@@ -1,5 +1,28 @@
 (() => {
   const api = globalThis.browser ?? globalThis.chrome;
+
+  // Safari's browser.* APIs are promise-only (callbacks are silently
+  // ignored), Chrome's accept both. Promise-first works everywhere.
+  function storageGet(defaults) {
+    try {
+      const p = api.storage.local.get(defaults);
+      if (p?.then) return p;
+    } catch { /* callback-only API */ }
+    return new Promise((resolve) => api.storage.local.get(defaults, resolve));
+  }
+
+  function sendMessage(msg) {
+    try {
+      const p = api.runtime.sendMessage(msg);
+      if (p?.then) return p.catch(() => undefined);
+    } catch { /* callback-only API */ }
+    return new Promise((resolve) =>
+      api.runtime.sendMessage(msg, (res) => {
+        void api.runtime.lastError;
+        resolve(res);
+      }),
+    );
+  }
   // Original bound before anything on the page can matter; also avoids
   // re-triggering our own history writes.
   const originalReplaceState = history.replaceState.bind(history);
@@ -17,8 +40,7 @@
     try {
       // Clean from the original so setting changes (e.g. keep referral)
       // can restore params that an earlier pass removed.
-      api.runtime.sendMessage({ type: 'clean', url: originalUrl, unwrap: false }, (res) => {
-        void api.runtime.lastError;
+      sendMessage({ type: 'clean', url: originalUrl, unwrap: false }).then((res) => {
         // Only act if the URL hasn't changed while we waited.
         if (res && res.cleaned && res.cleaned !== location.href && location.href === href) {
           try {
@@ -34,7 +56,7 @@
     }
   }
 
-  api.storage.local.get({ disabledHosts: [] }, ({ disabledHosts }) => {
+  storageGet({ disabledHosts: [] }).then(({ disabledHosts }) => {
     disabled = (disabledHosts ?? []).includes(location.hostname);
     applyClean();
   });

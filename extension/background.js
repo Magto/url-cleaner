@@ -14,10 +14,18 @@ function getProviders() {
   return providersPromise;
 }
 
+// Safari's browser.* APIs are promise-only (callbacks are silently ignored),
+// Chrome's accept both. Promise-first works everywhere.
+function storageGet(defaults) {
+  try {
+    const p = api.storage.local.get(defaults);
+    if (p?.then) return p;
+  } catch { /* callback-only API */ }
+  return new Promise((resolve) => api.storage.local.get(defaults, resolve));
+}
+
 function getKeepReferral() {
-  return new Promise((resolve) =>
-    api.storage.local.get({ keepReferral: false }, (r) => resolve(r.keepReferral === true)),
-  );
+  return storageGet({ keepReferral: false }).then((r) => r.keepReferral === true);
 }
 
 api.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
@@ -36,6 +44,10 @@ api.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
 // content script's isolated world, so the recheck signal comes from here.
 api.webNavigation.onHistoryStateUpdated.addListener(({ tabId, frameId }) => {
   if (frameId !== 0) return;
+  try {
+    const p = api.tabs.sendMessage(tabId, { type: 'recheck' });
+    if (p?.then) { p.catch(() => undefined); return; }
+  } catch { return; }
   api.tabs.sendMessage(tabId, { type: 'recheck' }, () => void api.runtime.lastError);
 });
 
@@ -51,6 +63,12 @@ api.commands.onCommand.addListener(async (command) => {
   // wants kept). Falls back to the tab URL on restricted pages.
   const original = await new Promise((resolve) => {
     try {
+      const p = api.tabs.sendMessage(tab.id, { type: 'getOriginal' });
+      if (p?.then) {
+        p.then((res) => resolve(res?.originalUrl ?? tab.url))
+          .catch(() => resolve(tab.url));
+        return;
+      }
       api.tabs.sendMessage(tab.id, { type: 'getOriginal' }, (res) => {
         void api.runtime.lastError;
         resolve(res?.originalUrl ?? tab.url);

@@ -1,3 +1,4 @@
+:root { color-scheme: light dark; }
 body {
   width: 360px;
   margin: 0;
@@ -35,6 +36,11 @@ button:disabled { background: #bbb; cursor: default; }
 .toggle { display: block; margin-top: 10px; }
 @media (prefers-color-scheme: dark) {
   body { background: #1e1e1e; color: #ddd; }
+  .label { color: #999; }
   .url { background: #2a2a2a; }
   .url.clean { background: #1e3320; }
+  .junk { color: #ef5350; }
+  #removed { color: #e57373; }
+  button { background: #2e7d32; color: #fff; }
+  button:disabled { background: #3a3a3a; color: #777; }
 }

@@ -2,6 +2,37 @@ const api = globalThis.browser ?? globalThis.chrome;
 
 const $ = (id) => document.getElementById(id);
 
+// Safari's browser.* APIs are promise-only (callbacks are silently ignored),
+// Chrome's accept both. Promise-first with callback fallback works everywhere.
+function storageGet(defaults) {
+  try {
+    const p = api.storage.local.get(defaults);
+    if (p?.then) return p;
+  } catch { /* callback-only API */ }
+  return new Promise((resolve) => api.storage.local.get(defaults, resolve));
+}
+
+function storageSet(items) {
+  try {
+    const p = api.storage.local.set(items);
+    if (p?.then) return p;
+  } catch { /* callback-only API */ }
+  return new Promise((resolve) => api.storage.local.set(items, resolve));
+}
+
+function sendMessage(msg) {
+  try {
+    const p = api.runtime.sendMessage(msg);
+    if (p?.then) return p.catch(() => undefined);
+  } catch { /* callback-only API */ }
+  return new Promise((resolve) =>
+    api.runtime.sendMessage(msg, (res) => {
+      void api.runtime.lastError;
+      resolve(res);
+    }),
+  );
+}
+
 // Renders the original URL with the removed parameters highlighted.
 function renderOriginal(url, removedSet) {
   const el = $('original');
@@ -38,6 +69,12 @@ async function init() {
   const url = await new Promise((resolve) => {
     if (!tab?.id) return resolve(tab?.url ?? '');
     try {
+      const p = api.tabs.sendMessage(tab.id, { type: 'getOriginal' });
+      if (p?.then) {
+        p.then((res) => resolve(res?.originalUrl ?? tab?.url ?? ''))
+          .catch(() => resolve(tab?.url ?? ''));
+        return;
+      }
       api.tabs.sendMessage(tab.id, { type: 'getOriginal' }, (res) => {
         void api.runtime.lastError;
         resolve(res?.originalUrl ?? tab?.url ?? '');
@@ -59,9 +96,7 @@ async function init() {
 
   let cleaned = url;
   async function refreshCleaned() {
-    const res = await new Promise((resolve) =>
-      api.runtime.sendMessage({ type: 'clean', url, unwrap: true }, resolve),
-    );
+    const res = await sendMessage({ type: 'clean', url, unwrap: true });
     cleaned = res?.cleaned ?? url;
     $('cleaned').textContent = cleaned;
     const removed = res?.removed ?? [];
@@ -81,22 +116,18 @@ async function init() {
     setTimeout(() => ($('copy').textContent = 'Copy clean URL'), 1200);
   });
 
-  const { keepReferral = false } = await new Promise((resolve) =>
-    api.storage.local.get({ keepReferral: false }, resolve),
-  );
+  const { keepReferral = false } = await storageGet({ keepReferral: false });
   $('keepreferral').checked = keepReferral === true;
   $('keepreferral').addEventListener('change', () => {
-    api.storage.local.set({ keepReferral: $('keepreferral').checked }, refreshCleaned);
+    storageSet({ keepReferral: $('keepreferral').checked }).then(refreshCleaned);
   });
 
-  let hosts = await new Promise((resolve) =>
-    api.storage.local.get({ disabledHosts: [] }, (r) => resolve(r.disabledHosts ?? [])),
-  );
+  let hosts = (await storageGet({ disabledHosts: [] })).disabledHosts ?? [];
   $('autoclean').checked = !hosts.includes(host);
   $('autoclean').addEventListener('change', () => {
     hosts = hosts.filter((h) => h !== host);
     if (!$('autoclean').checked) hosts.push(host);
-    api.storage.local.set({ disabledHosts: hosts });
+    storageSet({ disabledHosts: hosts });
   });
 }
 
