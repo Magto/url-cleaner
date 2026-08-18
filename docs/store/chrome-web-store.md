@@ -1,8 +1,29 @@
 # Chrome Web Store — submission sheet
 
 Everything to copy-paste into the [Developer Console](https://chrome.google.com/webstore/devconsole).
-Package zip: `dist/url-cleaner-<version>.zip` (rebuild:
-`Compress-Archive -Path extension\* -DestinationPath dist\url-cleaner-0.1.0.zip -Force`).
+Package zip: `dist/url-cleaner-<version>.zip`.
+
+Rebuild (Mac) — strips the Safari-only `background.scripts` manifest key
+from the packaged copy so the store reviewer never sees an MV2-only key:
+
+```bash
+python3 - <<'EOF'
+import json, zipfile
+from pathlib import Path
+src = Path('extension')
+m = json.loads(src.joinpath('manifest.json').read_text(encoding='utf-8-sig'))
+m['background'].pop('scripts', None)
+out = Path(f"dist/url-cleaner-{m['version']}.zip")
+with zipfile.ZipFile(out, 'w', zipfile.ZIP_DEFLATED) as z:
+    for p in sorted(src.rglob('*')):
+        if p.is_dir() or p.name == '.DS_Store': continue
+        rel = p.relative_to(src)
+        z.writestr('manifest.json', json.dumps(m, indent=2, ensure_ascii=False)) if str(rel)=='manifest.json' else z.write(p, rel)
+print(out)
+EOF
+```
+
+(Windows fallback: `Compress-Archive -Path extension\* -DestinationPath dist\url-cleaner-<version>.zip -Force` — but that keeps the scripts key.)
 
 ## Store listing
 
@@ -84,8 +105,8 @@ collected.
 
 ## Submission checklist
 
-1. [ ] Pay the one-time $5 developer registration fee, verify email + 2FA
-2. [ ] Rebuild zip from current `extension/` (command at top)
+1. [x] Pay the one-time $5 developer registration fee, verify email + 2FA (2026-08-18)
+2. [x] Rebuild zip from current `extension/` (dist/url-cleaner-0.5.0.zip)
 3. [ ] New item → upload zip
 4. [ ] Paste listing texts + upload screenshot(s)
 5. [ ] Fill Privacy tab (texts above), set data-collection to none
