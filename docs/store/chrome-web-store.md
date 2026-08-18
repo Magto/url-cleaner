@@ -61,6 +61,15 @@ EOF
 > fbclid, gclid. Only known junk is removed — unknown parameters are always
 > kept, so links never break.
 >
+> AFFILIATE LINKS — FAIR BY DESIGN
+> URL Cleaner never interferes with the links you click. It does no request
+> blocking or redirecting: when you click an affiliate link, the page loads
+> exactly as intended and the owner's affiliate credit registers as normal.
+> Cleaning only affects the URL you copy and share afterwards.
+> And if you want the links you share to keep crediting their owner, switch
+> on "Keep referral codes" in the popup — affiliate parameters (like
+> Amazon's tag=) then survive cleaning too.
+>
 > PRIVACY
 > Everything runs locally. No data collection, no analytics, no network
 > requests — the rules are bundled. Open source:
