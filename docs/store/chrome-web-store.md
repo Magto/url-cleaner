@@ -116,9 +116,13 @@ collected.
 
 1. [x] Pay the one-time $5 developer registration fee, verify email + 2FA (2026-08-18)
 2. [x] Rebuild zip from current `extension/` (dist/url-cleaner-0.5.0.zip)
-3. [ ] New item → upload zip
-4. [ ] Paste listing texts + upload screenshot(s)
-5. [ ] Fill Privacy tab (texts above), set data-collection to none
-6. [ ] Distribution: Public, all regions
-7. [ ] Submit for review (expect days–2 weeks first time due to all-sites
-       host permission)
+3. [x] New item → upload zip (0.5.0)
+4. [x] Paste listing texts + upload screenshot(s)
+5. [x] Fill Privacy tab (texts above), set data-collection to none
+6. [x] Distribution: Public, all regions
+7. [x] Submit for review — submitted 2026-08-18, status "Väntar på granskning"
+       (expect days–2 weeks due to all-sites host permission).
+       Gotcha: the submit flow has TWO dialogs — the auto-publish confirm,
+       then a "Publiceringen fördröjs" host-permission warning that needs a
+       second "Skicka för granskning" click. Miss it and nothing happens.
+       Item id: hfhhgaeacednhhdehoebekieekanigba
