@@ -1,7 +1,10 @@
 // Classic script: cleaner.js is loaded via manifest background.scripts in
 // Safari; Chrome's classic service worker pulls it in with importScripts.
 if (typeof importScripts === 'function') importScripts('lib/cleaner.js');
-const { cleanUrl, mergeRules } = globalThis.URLCleaner;
+// NOTE: no top-level destructuring into bare names here — in Safari the
+// background scripts share one global scope, and `const cleanUrl = …` would
+// shadow cleaner.js's global `function cleanUrl` (SyntaxError).
+const UC = globalThis.URLCleaner;
 
 const api = globalThis.browser ?? globalThis.chrome;
 
@@ -12,7 +15,7 @@ function getProviders() {
       fetch(api.runtime.getURL('rules/clearurls.json')).then((r) => r.json()),
       fetch(api.runtime.getURL('rules/custom.json')).then((r) => r.json()),
     ]);
-    return mergeRules(base, custom);
+    return UC.mergeRules(base, custom);
   })();
   return providersPromise;
 }
@@ -35,7 +38,7 @@ api.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   if (msg?.type === 'clean') {
     Promise.all([getProviders(), getKeepReferral()])
       .then(([providers, keepReferral]) =>
-        sendResponse(cleanUrl(msg.url, providers, { unwrap: !!msg.unwrap, keepReferral })),
+        sendResponse(UC.cleanUrl(msg.url, providers, { unwrap: !!msg.unwrap, keepReferral })),
       )
       .catch(() => sendResponse({ cleaned: msg.url, removed: [] }));
     return true; // async response
@@ -81,7 +84,7 @@ api.commands.onCommand.addListener(async (command) => {
     }
   });
   const [providers, keepReferral] = await Promise.all([getProviders(), getKeepReferral()]);
-  const { cleaned } = cleanUrl(original, providers, { unwrap: true, keepReferral });
+  const { cleaned } = UC.cleanUrl(original, providers, { unwrap: true, keepReferral });
   try {
     await api.scripting.executeScript({
       target: { tabId: tab.id },
