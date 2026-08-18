@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { describe, it, expect, beforeAll } from 'vitest';
-import { cleanUrl, mergeRules } from '../extension/lib/cleaner.js';
+import '../extension/lib/cleaner.js';
+const { cleanUrl, mergeRules } = globalThis.URLCleaner;
 
 let providers;
 beforeAll(async () => {

@@ -1,4 +1,7 @@
-import { cleanUrl, mergeRules } from './lib/cleaner.js';
+// Classic script: cleaner.js is loaded via manifest background.scripts in
+// Safari; Chrome's classic service worker pulls it in with importScripts.
+if (typeof importScripts === 'function') importScripts('lib/cleaner.js');
+const { cleanUrl, mergeRules } = globalThis.URLCleaner;
 
 const api = globalThis.browser ?? globalThis.chrome;
 

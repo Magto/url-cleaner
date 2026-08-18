@@ -1,9 +1,13 @@
 // Pure URL-cleaning engine implementing ClearURLs rule semantics.
 // No browser APIs — unit-testable in Node.
+//
+// Classic script (no ESM): Safari can't load module background scripts,
+// so this registers on globalThis and is pulled in via the manifest's
+// background.scripts array (Safari) or importScripts (Chrome SW).
 
 const MAX_UNWRAP_DEPTH = 5;
 
-export function cleanUrl(urlString, providers, opts = {}) {
+function cleanUrl(urlString, providers, opts = {}) {
   try {
     return cleanRecursive(urlString, providers, {
       unwrap: opts.unwrap === true,
@@ -172,7 +176,7 @@ function safeTest(pattern, value) {
   }
 }
 
-export function mergeRules(base, custom) {
+function mergeRules(base, custom) {
   return { ...(base?.providers ?? {}), ...(custom?.providers ?? {}) };
 }
 
@@ -183,3 +187,5 @@ function decodeSafe(s) {
     return s;
   }
 }
+
+globalThis.URLCleaner = { cleanUrl, mergeRules };

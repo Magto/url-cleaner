@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { cleanUrl, mergeRules } from '../extension/lib/cleaner.js';
+import '../extension/lib/cleaner.js';
+const { cleanUrl, mergeRules } = globalThis.URLCleaner;
 
 const GLOBAL_ONLY = {
   globalRules: {
