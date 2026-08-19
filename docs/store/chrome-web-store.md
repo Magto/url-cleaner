@@ -31,49 +31,59 @@ EOF
 
 **Summary (max 132 chars):**
 
-> Copy clean links. Removes tracking junk (utm, fbclid, gclid, Amazon pd_rd_* …) from URLs — in the address bar and on copy.
+> Copy clean links. Removes known tracking parameters from URLs — in the address bar and on copy.
 
 **Category:** Privacy & Security (fallback: Productivity → Tools)
 
 **Description:**
 
-> Ever copied a link and gotten three lines of tracking garbage?
->
-> URL Cleaner strips known tracking parameters from URLs so the links you
-> share are short and clean:
->
-> ✂ amazon.se/…/dp/B083DP4LXH?pd_rd_w=InoTU&content-id=amzn1.sym.7832…&pf_rd_p=7832…&pf_rd_r=ZQHK6…&pd_rd_wg=FU4eL
-> ✔ amazon.se/…/dp/B083DP4LXH
+<!-- Rewritten 2026-08-19 after CWS rejection (spam policy, ref "Yellow Nickel",
+     automated review). The original version contained a raw tracking-URL
+     example, literal parameter names (utm_*, fbclid, gclid, pd_rd_*), a brand
+     list and ✂/✔ symbols — all plausible keyword-spam classifier bait per
+     https://developer.chrome.com/docs/webstore/troubleshooting/#spam.
+     Keep this version in plain prose: no example URLs, no parameter names,
+     no brand enumerations, no decorative symbols. -->
+
+> Ever copied a link and gotten three lines of tracking garbage? URL Cleaner
+> strips known tracking parameters from the URLs you copy and share, so your
+> links stay short, clean and private.
 >
 > HOW IT WORKS
-> • Auto-clean: the address bar is rewritten in place (no reload) whenever
->   the URL contains known tracking parameters — a plain Ctrl+C already
->   gives you a clean link. Toggle it per site from the popup.
-> • Clean-copy: press Alt+Shift+C (remappable) or use the popup button to
->   copy a cleaned URL. Redirect wrappers like google.com/url?q=… are
->   unwrapped to their real destination.
-> • The popup shows exactly which parameters were removed — nothing is
->   hidden from you.
+>
+> Auto-clean: the address bar is rewritten in place (no page reload) whenever
+> the URL contains known tracking parameters, so a plain Ctrl+C already gives
+> you a clean link. You can toggle this per site from the popup.
+>
+> Clean-copy: press Alt+Shift+C (remappable) or use the popup button to copy
+> a cleaned version of the current URL. Redirect wrappers are unwrapped to
+> their real destination.
+>
+> Transparent: the popup shows exactly which parameters were removed —
+> nothing is hidden from you.
 >
 > WHAT GETS REMOVED
-> Based on the open-source ClearURLs ruleset: 200+ site-specific providers
-> (Amazon, Google, YouTube, AliExpress …) plus global trackers like utm_*,
-> fbclid, gclid. Only known junk is removed — unknown parameters are always
-> kept, so links never break.
 >
-> AFFILIATE LINKS — FAIR BY DESIGN
+> Cleaning is based on the open-source ClearURLs ruleset, covering more than
+> 200 site-specific providers as well as the most common global tracking
+> parameters. Only known tracking parameters are removed — unknown parameters
+> are always kept, so links never break.
+>
+> AFFILIATE LINKS, FAIR BY DESIGN
+>
 > URL Cleaner never interferes with the links you click. It does no request
-> blocking or redirecting: when you click an affiliate link, the page loads
-> exactly as intended and the owner's affiliate credit registers as normal.
-> Cleaning only affects the URL you copy and share afterwards.
-> And if you want the links you share to keep crediting their owner, switch
-> on "Keep referral codes" in the popup — affiliate parameters (like
-> Amazon's tag=) then survive cleaning too.
+> blocking or redirecting: pages load exactly as intended and affiliate
+> credit registers as normal. Cleaning only affects the URL you copy and
+> share afterwards. If you want the links you share to keep crediting their
+> owner, enable "Keep referral codes" in the popup and referral parameters
+> survive cleaning too.
 >
 > PRIVACY
-> Everything runs locally. No data collection, no analytics, no network
-> requests — the rules are bundled. Open source:
-> https://github.com/Magto/url-cleaner
+>
+> Everything runs locally in your browser. No data collection, no analytics,
+> no network requests — the cleaning rules are bundled with the extension.
+> The extension is fully open source; the source code is available via the
+> homepage link on this page.
 
 **Privacy policy URL:** https://github.com/Magto/url-cleaner/blob/master/PRIVACY.md
 
