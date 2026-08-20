@@ -18,6 +18,10 @@ Example: `amazon.se/...dp/B083DP4LXH?pd_rd_w=…&pf_rd_r=…&th=1`
 
 ## Install — Chrome
 
+**Chrome Web Store:** https://chromewebstore.google.com/detail/url-cleaner/hfhhgaeacednhhdehoebekieekanigba
+
+From source:
+
 1. `chrome://extensions` → Developer mode → **Load unpacked** → select `extension/`.
 2. If Alt+Shift+C does nothing: `chrome://extensions/shortcuts` → assign it.
 
